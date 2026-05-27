@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Player {
+  id               String   @id @default(uuid())
+  name             String
+  race             String
+  class            String
+  title            String   @default("Novato")
+  experience       Int      @default(0)
+  hp               Int
+  maxHp            Int
+  mp               Int
+  maxMp            Int
+  gold             Int      @default(0)
+  currentDungeonId String?
+  deathPenaltyUntil DateTime?
+  baseStats        String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  inventory InventoryItem[]
+  equipment Equipment[]
+  recipes   UnlockedRecipe[]
+}
+
+model InventoryItem {
+  id       String @id @default(uuid())
+  playerId String
+  itemId   String
+  quantity Int    @default(1)
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model Equipment {
+  id       String @id @default(uuid())
+  playerId String
+  slot     String
+  itemId   String
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model UnlockedRecipe {
+  id       String @id @default(uuid())
+  playerId String
+  recipeId String
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}

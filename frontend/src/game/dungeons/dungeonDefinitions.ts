@@ -1,0 +1,76 @@
+import type { Dungeon } from '../types';
+
+export const dungeons: Dungeon[] = [
+  {
+    id: 'dungeon_1',
+    name: 'Cavernas Rasas',
+    description: 'Cavernas superficiais habitadas por slimes e goblins fracos.',
+    level: 1,
+    damagePerTick: 5,
+    rewardGoldPerTick: 1,
+    experiencePerTick: 2,
+    minTitle: 'novato',
+    lootTable: [
+      { itemId: 'wood', chance: 0.25 },
+      { itemId: 'iron_ore', chance: 0.15 },
+      { itemId: 'cloth', chance: 0.20 },
+      { itemId: 'wooden_sword', chance: 0.03 },
+      { itemId: 'leather_armor', chance: 0.03 },
+      { itemId: 'cloth_robe', chance: 0.02 },
+      { itemId: 'short_bow', chance: 0.02 },
+      { itemId: 'iron_ring', chance: 0.02 },
+      { itemId: 'recipe_iron_sword', chance: 0.01 },
+    ],
+  },
+  {
+    id: 'dungeon_2',
+    name: 'Floresta Sombria',
+    description: 'Floresta densa assombrada por criaturas da noite.',
+    level: 2,
+    damagePerTick: 15,
+    rewardGoldPerTick: 3,
+    experiencePerTick: 6,
+    minTitle: 'explorador',
+    lootTable: [
+      { itemId: 'iron_ore', chance: 0.25 },
+      { itemId: 'cloth', chance: 0.20 },
+      { itemId: 'magic_essence', chance: 0.12 },
+      { itemId: 'iron_sword', chance: 0.03 },
+      { itemId: 'iron_armor', chance: 0.02 },
+      { itemId: 'mage_ring', chance: 0.02 },
+      { itemId: 'iron_ring', chance: 0.05 },
+      { itemId: 'recipe_iron_sword', chance: 0.03 },
+      { itemId: 'recipe_iron_armor', chance: 0.02 },
+      { itemId: 'recipe_mage_ring', chance: 0.02 },
+    ],
+  },
+  {
+    id: 'dungeon_3',
+    name: 'Masmorra do Dragão',
+    description: 'Profundezões onde um dragão ancião guarda tesouros lendários.',
+    level: 3,
+    damagePerTick: 40,
+    rewardGoldPerTick: 8,
+    experiencePerTick: 18,
+    minTitle: 'heroi',
+    lootTable: [
+      { itemId: 'magic_essence', chance: 0.20 },
+      { itemId: 'dragon_scale', chance: 0.08 },
+      { itemId: 'dragon_scale_armor', chance: 0.01 },
+      { itemId: 'dragon_blade', chance: 0.01 },
+      { itemId: 'iron_sword', chance: 0.05 },
+      { itemId: 'iron_armor', chance: 0.04 },
+      { itemId: 'mage_ring', chance: 0.04 },
+      { itemId: 'iron_ring', chance: 0.06 },
+      { itemId: 'recipe_iron_sword', chance: 0.04 },
+      { itemId: 'recipe_iron_armor', chance: 0.03 },
+      { itemId: 'recipe_mage_ring', chance: 0.03 },
+      { itemId: 'recipe_dragon_scale_armor', chance: 0.01 },
+      { itemId: 'recipe_dragon_blade', chance: 0.01 },
+    ],
+  },
+];
+
+export function getDungeon(id: string): Dungeon | undefined {
+  return dungeons.find((d) => d.id === id);
+}
