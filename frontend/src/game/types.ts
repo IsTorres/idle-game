@@ -10,9 +10,24 @@ export type Stat =
   | 'precision'
   | 'speed';
 
-export type ItemType = 'equipment' | 'material' | 'recipe';
-export type Rarity = 'common' | 'uncommon' | 'rare';
+export type ItemType = 'equipment' | 'material' | 'recipe' | 'consumable';
+export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 export type EquipmentSlot = 'weapon' | 'armor' | 'accessory';
+
+export type RarityWeights = Record<Rarity, number>;
+
+export interface RarityDefinition {
+  id: Rarity;
+  name: string;
+  statMultiplier: number;
+  color: string;
+  dropWeight: number;
+}
+
+export interface ConsumableEffect {
+  hpPercent?: number;
+  mpPercent?: number;
+}
 
 export interface StatBonuses {
   maxHp?: number;
@@ -40,6 +55,7 @@ export interface ItemDefinition {
   description: string;
   slot?: EquipmentSlot;
   statBonuses?: StatBonuses;
+  effect?: ConsumableEffect;
   ingredients?: Ingredient[];
   resultItemId?: string;
 }
@@ -70,11 +86,13 @@ export interface Dungeon {
   name: string;
   description: string;
   level: number;
-  damagePerTick: number;
+  minTitle: string;
+  recommendedTitle: string;
+  theme: string;
   rewardGoldPerTick: number;
   experiencePerTick: number;
-  minTitle: string;
-  lootTable: LootTableEntry[];
+  rarityWeights: RarityWeights;
+  pool: string[];
 }
 
 export interface LootTableEntry {
@@ -82,15 +100,31 @@ export interface LootTableEntry {
   chance: number;
 }
 
+export interface Mob {
+  id: string;
+  name: string;
+  icon: string;
+  kind: 'trash' | 'elite' | 'boss';
+  maxHp: number;
+  damage: number;
+  defense: number;
+  xpReward: number;
+  goldReward: number;
+  lootTable: LootTableEntry[];
+  dungeonId: string;
+}
+
 export interface InventoryEntry {
   id: string;
   itemId: string;
   quantity: number;
+  rarity?: Rarity;
 }
 
 export interface EquipmentEntry {
   slot: EquipmentSlot;
   itemId: string;
+  rarity?: Rarity;
 }
 
 export interface Player {
@@ -106,6 +140,8 @@ export interface Player {
   maxMp: number;
   gold: number;
   currentDungeonId: string | null;
+  currentMobId: string | null;
+  currentMobHp: number | null;
   deathPenaltyUntil: number | null;
   baseStats: StatBonuses;
   inventory: InventoryEntry[];
@@ -115,6 +151,6 @@ export interface Player {
 
 export interface CombatLogEntry {
   tick: number;
-  type: 'damage' | 'heal' | 'loot' | 'death' | 'regen' | 'exp' | 'info';
+  type: 'damage' | 'heal' | 'loot' | 'death' | 'regen' | 'exp' | 'info' | 'mobDamage' | 'mobKill' | 'shop' | 'use';
   message: string;
 }

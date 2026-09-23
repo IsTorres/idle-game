@@ -3,6 +3,7 @@ import { getRace } from '../entities/races';
 import { getClass } from '../entities/classes';
 import { titles } from '../entities/titles';
 import { getItemDefinition } from '../items/itemDefinitions';
+import { getItemStats } from '../items/itemStats';
 
 const allStats: Stat[] = [
   'maxHp', 'maxMp', 'regenHp', 'regenMp',
@@ -41,8 +42,9 @@ export function getEffectiveStats(player: Player): StatBonuses {
   for (const eq of player.equipment) {
     const def = getItemDefinition(eq.itemId);
     if (def?.statBonuses) {
+      const bonuses = getItemStats(def, eq.rarity ?? 'common');
       for (const stat of allStats) {
-        const bonus = def.statBonuses[stat];
+        const bonus = bonuses[stat];
         if (bonus) {
           stats[stat] = (stats[stat] ?? 0) + bonus;
         }

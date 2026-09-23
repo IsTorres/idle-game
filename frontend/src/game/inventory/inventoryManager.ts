@@ -1,13 +1,20 @@
-import type { Player, InventoryEntry, EquipmentEntry, EquipmentSlot } from '../types';
+import type { Player, InventoryEntry, EquipmentEntry, EquipmentSlot, Rarity } from '../types';
 import { getItemDefinition } from '../items/itemDefinitions';
 
 let nextInventoryId = 1;
 
-export function addItem(player: Player, itemId: string, quantity: number = 1): boolean {
+function normalizeRarity(rarity?: Rarity): Rarity {
+  // ponytail: single 'common' key for everything without an explicit rarity
+  // so materials, craft results and old saves never split into separate stacks
+  return rarity ?? 'common';
+}
+
+export function addItem(player: Player, itemId: string, quantity: number = 1, rarity?: Rarity): boolean {
   const def = getItemDefinition(itemId);
   if (!def) return false;
 
-  const existing = player.inventory.find((inv) => inv.itemId === itemId);
+  const rarityKey = normalizeRarity(rarity);
+  const existing = player.inventory.find((inv) => inv.itemId === itemId && normalizeRarity(inv.rarity) === rarityKey);
   if (existing) {
     existing.quantity += quantity;
   } else {
@@ -15,6 +22,7 @@ export function addItem(player: Player, itemId: string, quantity: number = 1): b
       id: `inv_${nextInventoryId++}`,
       itemId,
       quantity,
+      rarity: rarityKey,
     });
   }
 
@@ -27,15 +35,17 @@ export function removeItem(player: Player, itemId: string, quantity: number): bo
 
   existing.quantity -= quantity;
   if (existing.quantity <= 0) {
-    player.inventory = player.inventory.filter((inv) => inv.itemId !== itemId);
+    player.inventory = player.inventory.filter((inv) => inv.id !== existing.id);
   }
 
   return true;
 }
 
 export function getItemCount(player: Player, itemId: string): number {
-  const existing = player.inventory.find((inv) => inv.itemId === itemId);
-  return existing?.quantity ?? 0;
+  // counts across rarities; used for materials/consumables
+  return player.inventory
+    .filter((inv) => inv.itemId === itemId)
+    .reduce((sum, inv) => sum + inv.quantity, 0);
 }
 
 export function equipItem(player: Player, inventoryId: string): boolean {
@@ -52,9 +62,16 @@ export function equipItem(player: Player, inventoryId: string): boolean {
     unequipItem(player, slot);
   }
 
-  player.equipment.push({ slot, itemId: invEntry.itemId });
+  player.equipment.push({ slot, itemId: invEntry.itemId, rarity: normalizeRarity(invEntry.rarity) });
 
-  removeItem(player, invEntry.itemId, 1);
+  const invIndex = player.inventory.findIndex((inv) => inv.id === invEntry.id);
+  if (invIndex !== -1) {
+    const stack = player.inventory[invIndex];
+    stack.quantity -= 1;
+    if (stack.quantity <= 0) {
+      player.inventory = player.inventory.filter((inv) => inv.id !== stack.id);
+    }
+  }
 
   return true;
 }
@@ -66,7 +83,7 @@ export function unequipItem(player: Player, slot: EquipmentSlot): boolean {
   const eq = player.equipment[eqIndex];
   player.equipment.splice(eqIndex, 1);
 
-  addItem(player, eq.itemId, 1);
+  addItem(player, eq.itemId, 1, normalizeRarity(eq.rarity));
 
   return true;
 }
@@ -75,3 +92,5 @@ export function getEquippedItemId(player: Player, slot: EquipmentSlot): string |
   const eq = player.equipment.find((e) => e.slot === slot);
   return eq?.itemId ?? null;
 }
+
+export type { InventoryEntry, EquipmentEntry };

@@ -20,6 +20,8 @@
   --rarity-common: #8b949e;
   --rarity-uncommon: #58a6ff;
   --rarity-rare: #d2a8ff;
+  --rarity-epic: #ff7ab8;
+  --rarity-legendary: #ffb454;
   --hp-color: #f85149;
   --mp-color: #58a6ff;
   --exp-color: #d29922;
@@ -142,6 +144,13 @@ input:focus, select:focus {
   gap: 16px;
 }
 
+.grid-main {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
 .text-center {
   text-align: center;
 }
@@ -231,6 +240,213 @@ input:focus, select:focus {
 .item-common { color: var(--rarity-common); }
 .item-uncommon { color: var(--rarity-uncommon); }
 .item-rare { color: var(--rarity-rare); }
+.item-epic { color: var(--rarity-epic); }
+.item-legendary { color: var(--rarity-legendary); }
+
+.text-xs { font-size: 0.7rem; }
+
+.item-stats {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-up { color: var(--success); font-weight: 600; }
+.stat-down { color: var(--danger); font-weight: 600; }
+
+.market-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.market-row {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.market-buy {
+  width: 100%;
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+.dungeon-scene {
+  position: relative;
+  min-height: 260px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.scene-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 15% 85%, rgba(255, 120, 60, 0.18), transparent 60%),
+    radial-gradient(circle at 85% 20%, rgba(90, 160, 255, 0.12), transparent 55%),
+    linear-gradient(180deg, #10151d 0%, #0b0f16 100%);
+}
+
+.theme-forest .scene-backdrop {
+  background:
+    radial-gradient(circle at 20% 90%, rgba(60, 255, 120, 0.14), transparent 55%),
+    radial-gradient(circle at 80% 15%, rgba(120, 90, 255, 0.10), transparent 50%),
+    linear-gradient(180deg, #0e1614 0%, #0a100d 100%);
+}
+
+.theme-draconic .scene-backdrop {
+  background:
+    radial-gradient(circle at 50% 100%, rgba(255, 90, 30, 0.25), transparent 60%),
+    linear-gradient(180deg, #1a0e0c 0%, #120805 100%);
+}
+
+.theme-thunder .scene-backdrop {
+  background:
+    radial-gradient(circle at 70% 20%, rgba(120, 160, 255, 0.22), transparent 45%),
+    linear-gradient(180deg, #0d1220 0%, #080b12 100%);
+}
+
+.theme-abyss .scene-backdrop {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(190, 90, 255, 0.18), transparent 70%),
+    linear-gradient(180deg, #0d0714 0%, #07040b 100%);
+}
+
+.scene-hud {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scene-vs {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex: 1;
+}
+
+.fighter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+}
+
+.fighter-icon {
+  font-size: 3rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+}
+
+.fighter-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-glow {
+  filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.45));
+}
+
+.boss-tag {
+  color: var(--rarity-legendary);
+}
+
+.vs-mark {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.mob-hit {
+  animation: mobShake 0.35s ease;
+}
+
+.mob-vanish {
+  animation: mobVanish 0.6s ease forwards;
+}
+
+@keyframes mobShake {
+  0% { transform: translateX(0); filter: drop-shadow(0 0 12px rgba(248, 81, 73, 0.9)); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes mobVanish {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.1) translateY(-30px); opacity: 0; }
+}
+
+.float-events {
+  position: absolute;
+  right: 12px;
+  top: 40px;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 2;
+  max-width: 55%;
+}
+
+.float-event {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  border-left: 3px solid var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: floatUp 3s ease-out forwards;
+}
+
+.float-event.ev-mobDamage { border-left-color: var(--hp-color); color: #ffa198; }
+.float-event.ev-loot { border-left-color: var(--gold); color: var(--gold); }
+.float-event.ev-mobKill { border-left-color: var(--success); color: var(--success); font-weight: 600; }
+.float-event.ev-exp { border-left-color: var(--exp-color); }
+.float-event.ev-regen { border-left-color: var(--success); color: var(--success); }
+
+@keyframes floatUp {
+  0% { opacity: 0; transform: translateY(8px); }
+  15% { opacity: 1; transform: translateY(0); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-28px); }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-main {
+    grid-template-columns: 1fr;
+  }
+}
 
 .log-entry {
   padding: 2px 0;

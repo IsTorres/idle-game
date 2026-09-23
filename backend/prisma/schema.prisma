@@ -20,6 +20,8 @@ model Player {
   maxMp            Int
   gold             Int      @default(0)
   currentDungeonId String?
+  currentMobId     String?
+  currentMobHp     Int?
   deathPenaltyUntil DateTime?
   baseStats        String
   createdAt        DateTime @default(now())
@@ -35,6 +37,7 @@ model InventoryItem {
   playerId String
   itemId   String
   quantity Int    @default(1)
+  rarity   String @default("common")
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 }
@@ -44,6 +47,7 @@ model Equipment {
   playerId String
   slot     String
   itemId   String
+  rarity   String @default("common")
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 }

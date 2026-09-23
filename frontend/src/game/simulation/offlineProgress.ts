@@ -59,6 +59,8 @@ export function calculateOfflineProgress(player: Player, elapsedMs: number): Off
       const deathPenaltyMs = 5 * 60 * 1000;
       player.deathPenaltyUntil = Date.now() + deathPenaltyMs;
       player.currentDungeonId = null;
+      player.currentMobId = null;
+      player.currentMobHp = null;
       player.hp = Math.floor(player.maxHp / 2);
       result.ticksUntilDeath = i + 1;
       result.died = true;
@@ -76,7 +78,7 @@ export function calculateOfflineProgress(player: Player, elapsedMs: number): Off
 
     const loot = rollLoot(player);
     if (loot) {
-      addItem(player, loot.itemId, loot.quantity);
+      addItem(player, loot.itemId, loot.quantity, loot.rarity);
       const def = getItemDefinition(loot.itemId);
       if (def?.type === 'recipe') {
         unlockRecipe(player, loot.itemId);

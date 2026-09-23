@@ -2,9 +2,11 @@ import { useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { PlayerStatus } from '../CharacterCreation/PlayerStatus';
 import { DungeonPanel } from '../DungeonScreen/DungeonPanel';
+import { DungeonView } from '../DungeonScene/DungeonView';
 import { InventoryPanel } from '../Inventory/InventoryPanel';
 import { EquipmentSlots } from '../Equipment/EquipmentSlots';
 import { CraftingPanel } from '../Crafting/CraftingPanel';
+import { MarketPanel } from '../Economy/MarketPanel';
 import { OfflineReport } from '../Layout/OfflineReport';
 import { getDungeon } from '../../game/dungeons/dungeonDefinitions';
 import { getEffectiveStats } from '../../game/player/playerCalculations';
@@ -66,32 +68,40 @@ export function Dashboard() {
         </div>
       )}
 
-      <div className="grid-2 mb-4">
+      <div className="grid-main mb-4">
         <PlayerStatus player={player} stats={stats} />
-        <DungeonPanel />
-      </div>
-
-      {currentDungeon && (
-        <div className="card mb-4">
-          <h3 className="mb-2">Log de Combate</h3>
-          <div style={{ maxHeight: 200, overflowY: 'auto' }}>
-            {combatLogs.slice(-50).map((log, i) => (
-              <div key={i} className={`log-entry text-${log.type === 'death' ? 'danger' : log.type === 'loot' ? 'success' : log.type === 'exp' ? '' : 'muted'}`}>
-                [{log.tick}] {log.message}
+        <div className="flex flex-col gap-4">
+          {currentDungeon ? <DungeonView /> : <DungeonPanel />}
+          {currentDungeon && (
+            <div className="card">
+              <h3 className="mb-2">Log de Combate</h3>
+              <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+                {combatLogs.slice(-50).map((log, i) => (
+                  <div
+                    key={combatLogs.length - 50 + i}
+                    className={`log-entry text-${
+                      log.type === 'death' ? 'danger' : log.type === 'loot' || log.type === 'mobKill' ? 'success' : log.type === 'exp' ? '' : 'muted'
+                    }`}
+                  >
+                    [{log.tick}] {log.message}
+                  </div>
+                ))}
+                {combatLogs.length === 0 && (
+                  <div className="text-sm text-muted">Nenhum evento ainda...</div>
+                )}
               </div>
-            ))}
-            {combatLogs.length === 0 && (
-              <div className="text-sm text-muted">Nenhum evento ainda...</div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div className="grid-3 mb-4">
         <EquipmentSlots />
         <InventoryPanel />
         <CraftingPanel />
       </div>
+
+      <MarketPanel />
     </div>
   );
 }

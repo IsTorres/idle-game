@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Player, CombatLogEntry } from '../game/types';
+import type { Player, CombatLogEntry, Rarity } from '../game/types';
 import { createPlayerBaseStats, getEffectiveStats } from '../game/player/playerCalculations';
 import { getRace } from '../game/entities/races';
 import { getClass } from '../game/entities/classes';
@@ -14,6 +14,9 @@ import { equipItem, unequipItem } from '../game/inventory/inventoryManager';
 import { craftItem, canCraft } from '../game/crafting/recipes';
 import { addItem } from '../game/inventory/inventoryManager';
 import { getItemDefinition } from '../game/items/itemDefinitions';
+import { getMobsByDungeon, getMob } from '../game/mobs/mobDefinitions';
+import { buyItem } from '../game/economy/shop';
+import { useConsumable } from '../game/items/consumables';
 
 function generateId(): string {
   return crypto.randomUUID();
@@ -41,6 +44,8 @@ interface GameStore {
   equip: (inventoryId: string) => void;
   unequip: (slot: 'weapon' | 'armor' | 'accessory') => void;
   craft: (recipeId: string) => void;
+  buyItem: (itemId: string) => void;
+  useItem: (inventoryId: string) => void;
 
   save: () => Promise<void>;
   clearSave: () => void;
@@ -76,6 +81,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       maxMp,
       gold: 0,
       currentDungeonId: null,
+      currentMobId: null,
+      currentMobHp: null,
       deathPenaltyUntil: null,
       baseStats,
       inventory: [],
@@ -119,19 +126,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
         maxMp: data.maxMp,
         gold: data.gold,
         currentDungeonId: data.currentDungeonId,
+        currentMobId: data.currentMobId ?? null,
+        currentMobHp: data.currentMobHp ?? null,
         deathPenaltyUntil: data.deathPenaltyUntil ? new Date(data.deathPenaltyUntil).getTime() : null,
         baseStats: JSON.parse(data.baseStats),
-        inventory: data.inventory?.map((inv: { id: string; itemId: string; quantity: number }) => ({
+        inventory: data.inventory?.map((inv: { id: string; itemId: string; quantity: number; rarity?: string }) => ({
           id: inv.id,
           itemId: inv.itemId,
           quantity: inv.quantity,
+          rarity: (inv.rarity ?? 'common') as Rarity,
         })) ?? [],
-        equipment: data.equipment?.map((eq: { slot: string; itemId: string }) => ({
+        equipment: data.equipment?.map((eq: { slot: string; itemId: string; rarity?: string }) => ({
           slot: eq.slot,
           itemId: eq.itemId,
+          rarity: (eq.rarity ?? 'common') as Rarity,
         })) ?? [],
         unlockedRecipes: data.recipes?.map((r: { recipeId: string }) => r.recipeId) ?? [],
       };
+
+      if (player.currentDungeonId && (!player.currentMobId || player.currentMobHp === null)) {
+        const mobs = getMobsByDungeon(player.currentDungeonId);
+        const mob = mobs[0] ?? mobs.find((m) => m.id === player.currentMobId);
+        if (mob) {
+          player.currentMobId = mob.id;
+          player.currentMobHp = mob.maxHp;
+        }
+      }
 
       const now = Date.now();
       const lastUpdate = new Date(data.updatedAt).getTime();
@@ -201,6 +221,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (player.hp <= 0) return false;
 
     player.currentDungeonId = dungeonId;
+    const firstMob = getMobsByDungeon(dungeonId)[0];
+    player.currentMobId = firstMob?.id ?? null;
+    player.currentMobHp = firstMob ? firstMob.maxHp : null;
     set({
       player: { ...player },
       combatLogs: [{ tick: 0, type: 'info', message: `Entrou em: ${dungeon.name}` }],
@@ -215,6 +238,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const dungeon = getDungeon(player.currentDungeonId);
     player.currentDungeonId = null;
+    player.currentMobId = null;
+    player.currentMobHp = null;
 
     set({
       player: { ...player },
@@ -270,6 +295,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
         combatLogs: [
           ...get().combatLogs,
           { tick: 0, type: 'info', message: `Craftou: ${resultDef?.name ?? recipeId}!` },
+        ],
+      });
+    }
+  },
+
+  buyItem: (itemId) => {
+    const { player } = get();
+    if (!player) return;
+
+    if (buyItem(player, itemId)) {
+      const def = getItemDefinition(itemId);
+      set({
+        player: { ...player },
+        combatLogs: [
+          ...get().combatLogs,
+          { tick: 0, type: 'shop', message: `Comprou: ${def?.name ?? itemId}.` },
+        ],
+      });
+    }
+  },
+
+  useItem: (inventoryId) => {
+    const { player } = get();
+    if (!player) return;
+
+    const inv = player.inventory.find((i) => i.id === inventoryId);
+    if (useConsumable(player, inventoryId)) {
+      const def = inv ? getItemDefinition(inv.itemId) : null;
+      set({
+        player: { ...player },
+        combatLogs: [
+          ...get().combatLogs,
+          { tick: 0, type: 'use', message: `Usou: ${def?.name ?? 'item'}.` },
         ],
       });
     }

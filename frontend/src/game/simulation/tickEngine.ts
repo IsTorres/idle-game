@@ -5,6 +5,8 @@ import { addItem } from '../inventory/inventoryManager';
 import { unlockRecipe } from '../crafting/recipes';
 import { updateTitle, getEffectiveStats } from '../player/playerCalculations';
 import { getItemDefinition } from '../items/itemDefinitions';
+import { getRarityName } from '../items/rarityDefinitions';
+import { getMob } from '../mobs/mobDefinitions';
 
 let tickCounter = 0;
 
@@ -29,12 +31,22 @@ export function processTick(player: Player): {
   }
 
   const result = processCombatTick(player);
+  const foughtMob = getMob(result.mobId);
+  const mobName = foughtMob?.name ?? 'inimigo';
 
   if (result.damageTaken > 0) {
     logs.push({
       tick: tickCounter,
       type: 'damage',
-      message: `Recebeu ${result.damageTaken} de dano. HP: ${result.hpAfter}/${player.maxHp}`,
+      message: `${mobName} acertou você por ${result.damageTaken}. HP: ${result.hpAfter}/${player.maxHp}`,
+    });
+  }
+
+  if (result.mobDamageDealt > 0) {
+    logs.push({
+      tick: tickCounter,
+      type: 'mobDamage',
+      message: `Você causou ${result.mobDamageDealt} de dano no ${mobName}.`,
     });
   }
 
@@ -48,10 +60,20 @@ export function processTick(player: Player): {
     });
   }
 
+  if (result.mobKilled) {
+    logs.push({
+      tick: tickCounter,
+      type: 'mobKill',
+      message: `Derrotou: ${mobName}!`,
+    });
+  }
+
   if (result.isDead) {
     const deathPenaltyMs = 5 * 60 * 1000;
     player.deathPenaltyUntil = Date.now() + deathPenaltyMs;
     player.currentDungeonId = null;
+    player.currentMobId = null;
+    player.currentMobHp = null;
     player.hp = Math.floor(player.maxHp / 2);
 
     logs.push({
@@ -80,9 +102,12 @@ export function processTick(player: Player): {
 
   const loot = rollLoot(player);
   if (loot) {
-    addItem(player, loot.itemId, loot.quantity);
+    addItem(player, loot.itemId, loot.quantity, loot.rarity);
     const def = getItemDefinition(loot.itemId);
     const itemName = def?.name ?? loot.itemId;
+    const rarityLabel = def?.type === 'equipment' && loot.rarity
+      ? ` (${getRarityName(loot.rarity)})`
+      : '';
 
     if (def?.type === 'recipe') {
       unlockRecipe(player, loot.itemId);
@@ -95,7 +120,7 @@ export function processTick(player: Player): {
       logs.push({
         tick: tickCounter,
         type: 'loot',
-        message: `Encontrou: ${itemName}.`,
+        message: `Encontrou: ${itemName}${rarityLabel}.`,
       });
     }
   }

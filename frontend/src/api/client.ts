@@ -7,9 +7,11 @@ export interface SaveData {
   experience: number;
   title: string;
   currentDungeonId: string | null;
+  currentMobId: string | null;
+  currentMobHp: number | null;
   deathPenaltyUntil: string | null;
-  inventory: { itemId: string; quantity: number }[];
-  equipment: { slot: string; itemId: string }[];
+  inventory: { itemId: string; quantity: number; rarity?: string }[];
+  equipment: { slot: string; itemId: string; rarity?: string }[];
   recipes: { recipeId: string }[];
 }
 

@@ -33,9 +33,11 @@ export const gameService = {
     experience: number;
     title: string;
     currentDungeonId: string | null;
+    currentMobId: string | null;
+    currentMobHp: number | null;
     deathPenaltyUntil: string | null;
-    inventory: { itemId: string; quantity: number }[];
-    equipment: { slot: string; itemId: string }[];
+    inventory: { itemId: string; quantity: number; rarity?: string }[];
+    equipment: { slot: string; itemId: string; rarity?: string }[];
     recipes: { recipeId: string }[];
   }) {
     await prisma.$transaction(async (tx) => {
@@ -48,6 +50,8 @@ export const gameService = {
           experience: data.experience,
           title: data.title,
           currentDungeonId: data.currentDungeonId,
+          currentMobId: data.currentMobId,
+          currentMobHp: data.currentMobHp,
           deathPenaltyUntil: data.deathPenaltyUntil ? new Date(data.deathPenaltyUntil) : null,
         },
       });
@@ -59,6 +63,7 @@ export const gameService = {
             playerId: id,
             itemId: inv.itemId,
             quantity: inv.quantity,
+            rarity: inv.rarity ?? 'common',
           })),
         });
       }
@@ -70,6 +75,7 @@ export const gameService = {
             playerId: id,
             slot: eq.slot,
             itemId: eq.itemId,
+            rarity: eq.rarity ?? 'common',
           })),
         });
       }

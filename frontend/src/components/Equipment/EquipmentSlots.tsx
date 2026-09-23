@@ -1,5 +1,6 @@
 import { useGameStore } from '../../store/gameStore';
 import { getItemDefinition } from '../../game/items/itemDefinitions';
+import { ItemStats, getItemRarity } from '../common/ItemStats';
 
 const slotLabels: Record<string, string> = {
   weapon: 'Arma',
@@ -27,7 +28,7 @@ export function EquipmentSlots() {
                 <div>
                   <div className="text-sm text-muted">{slotLabels[slot]}</div>
                   {def ? (
-                    <span className={`item-${def.rarity}`}>{def.name}</span>
+                    <span className={`item-${getItemRarity(equipped!.itemId, equipped!.rarity)}`}>{def.name}</span>
                   ) : (
                     <span className="text-sm text-muted">Vazio</span>
                   )}
@@ -38,6 +39,9 @@ export function EquipmentSlots() {
                   </button>
                 )}
               </div>
+              {def && equipped && (
+                <ItemStats itemId={equipped.itemId} rarity={getItemRarity(equipped.itemId, equipped.rarity)} />
+              )}
             </div>
           );
         })}

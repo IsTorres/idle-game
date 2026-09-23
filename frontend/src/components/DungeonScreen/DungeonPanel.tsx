@@ -1,6 +1,8 @@
 import { useGameStore } from '../../store/gameStore';
 import { dungeons } from '../../game/dungeons/dungeonDefinitions';
 import { meetsTitleRequirement } from '../../game/player/playerCalculations';
+import { getMobsByDungeon } from '../../game/mobs/mobDefinitions';
+import { getTitleById } from '../../game/entities/titles';
 
 export function DungeonPanel() {
   const player = useGameStore((s) => s.player);
@@ -32,6 +34,8 @@ export function DungeonPanel() {
           )}
           {dungeons.map((d) => {
             const accessible = meetsTitleRequirement(player.experience, d.minTitle) && !inPenalty && player.hp > 0;
+            const mobs = getMobsByDungeon(d.id);
+            const recTitle = getTitleById(d.recommendedTitle);
             return (
               <button
                 key={d.id}
@@ -45,13 +49,19 @@ export function DungeonPanel() {
                   borderColor: inDungeon ? 'var(--accent)' : undefined,
                 }}
               >
-                <strong>{d.name}</strong>
+                <div className="flex justify-between items-center">
+                  <strong>{d.name}</strong>
+                  <span className={`text-${accessible ? 'success' : 'muted'} text-sm`}>Nível {d.level}</span>
+                </div>
                 <div className="flex justify-between text-sm text-muted">
-                  <span>Dano: {d.damagePerTick}/tick</span>
                   <span>EXP: {d.experiencePerTick}/tick</span>
                   <span className="text-gold">{d.rewardGoldPerTick} gold/tick</span>
+                  <span>{mobs.map((m) => m.icon).join(' ')}</span>
                 </div>
                 <div className="text-sm text-muted">{d.description}</div>
+                {recTitle && (
+                  <div className="text-xs text-muted">Recomendado: {recTitle.name}</div>
+                )}
               </button>
             );
           })}
