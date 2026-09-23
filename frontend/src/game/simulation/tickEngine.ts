@@ -7,6 +7,7 @@ import { updateTitle, getEffectiveStats } from '../player/playerCalculations';
 import { getItemDefinition } from '../items/itemDefinitions';
 import { getRarityName } from '../items/rarityDefinitions';
 import { getMob } from '../mobs/mobDefinitions';
+import { getTitleById } from '../entities/titles';
 
 let tickCounter = 0;
 
@@ -38,7 +39,7 @@ export function processTick(player: Player): {
     logs.push({
       tick: tickCounter,
       type: 'damage',
-      message: `${mobName} acertou você por ${result.damageTaken}. HP: ${result.hpAfter}/${player.maxHp}`,
+      message: `${mobName} acertou você por ${result.damageTaken}${foughtMob?.magicDamage ? ' (mágico)' : ''}. HP: ${result.hpAfter}/${player.maxHp}`,
     });
   }
 
@@ -86,8 +87,19 @@ export function processTick(player: Player): {
   }
 
   if (result.expGained > 0) {
+    const prevTitle = player.title;
     player.experience += result.expGained;
     updateTitle(player);
+
+    if (player.title !== prevTitle) {
+      player.hp = player.maxHp;
+      player.mp = player.maxMp;
+      logs.push({
+        tick: tickCounter,
+        type: 'info',
+        message: `Novo título: ${getTitleById(player.title)?.name ?? player.title}! Vida e mana restauradas.`,
+      });
+    }
 
     logs.push({
       tick: tickCounter,

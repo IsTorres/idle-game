@@ -165,4 +165,46 @@ function makePlayer(overrides: Partial<Player> = {}): Player {
   console.log('OK: shop + consumables');
 }
 
+{
+  // magic mobs hit magicalDefense, not physicalDefense (warrior armor must not trivialize them)
+  const shaman = getMob('goblin_shaman')!;
+  assert.ok(shaman.magicDamage, 'goblin_shaman must be a magic attacker');
+  const d1 = getDungeon('dungeon_1')!;
+  assert.ok(d1.pool.includes('goblin_shaman') && d1.pool.includes('arcane_shroom'), 'dungeon_1 must mix magic mobs');
+  assert.equal(d1.pool.length, 5, 'dungeon_1 should have 5 distinct mobs');
+
+  const realStats = { magicalDefense: 12, physicalDefense: 18, physicalDamage: 50, regenHp: 2, regenMp: 1 };
+  const mage = makePlayer({
+    currentDungeonId: 'dungeon_1',
+    baseStats: { maxHp: 1000, maxMp: 100, ...realStats },
+  });
+  mage.currentMobId = 'goblin_shaman';
+  mage.currentMobHp = shaman.maxHp;
+  const hpBefore = mage.hp;
+  processTick(mage);
+  assert.ok(mage.hp < hpBefore, 'magic mob must deal damage to mage');
+  assert.equal(hpBefore - mage.hp, Math.max(1, shaman.damage - 12) - 2, 'damage must use magicalDefense minus regen');
+  console.log('OK: magic mobs hit magical defense');
+}
+
+{
+  // title up restores HP/MP to full on the same tick
+  const player = makePlayer({
+    currentDungeonId: 'dungeon_1',
+    experience: 699,
+    maxHp: 1000,
+    maxMp: 100,
+    hp: 340,
+    mp: 55,
+    baseStats: { maxHp: 1000, maxMp: 100, physicalDefense: 100, physicalDamage: 999, regenHp: 0, regenMp: 0 },
+  });
+  player.currentMobId = 'slime';
+  player.currentMobHp = 1000;
+  processTick(player); // +2 exp -> title 'explorador'
+  assert.equal(player.title, 'explorador', 'title must level up');
+  assert.equal(player.hp, player.maxHp, 'hp must restore to max on level up');
+  assert.equal(player.mp, player.maxMp, 'mp must restore to max on level up');
+  console.log('OK: level up restores hp/mp');
+}
+
 console.log('all sim checks passed');

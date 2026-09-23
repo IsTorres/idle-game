@@ -95,13 +95,29 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid-3 mb-4">
-        <EquipmentSlots />
-        <InventoryPanel />
-        <CraftingPanel />
-      </div>
+      {!currentDungeon && (
+        <div className="grid-2 mb-4">
+          <MarketPanel />
+          <div className="flex flex-col gap-4">
+            <EquipmentSlots />
+            <InventoryPanel />
+          </div>
+        </div>
+      )}
 
-      <MarketPanel />
+      {currentDungeon && (
+        <div className="grid-3 mb-4">
+          <EquipmentSlots />
+          <InventoryPanel />
+          <CraftingPanel />
+        </div>
+      )}
+
+      {!currentDungeon && (
+        <div className="grid-1 mb-4">
+          <CraftingPanel />
+        </div>
+      )}
     </div>
   );
 }

@@ -68,8 +68,13 @@ export function calculateOfflineProgress(player: Player, elapsedMs: number): Off
     }
 
     if (tickResult.expGained > 0) {
+      const prevTitle = player.title;
       player.experience += tickResult.expGained;
       updateTitle(player);
+      if (player.title !== prevTitle) {
+        player.hp = player.maxHp;
+        player.mp = player.maxMp;
+      }
     }
 
     if (tickResult.goldGained > 0) {

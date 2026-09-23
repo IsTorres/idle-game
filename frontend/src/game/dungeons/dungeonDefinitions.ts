@@ -12,7 +12,7 @@ export const dungeons: Dungeon[] = [
     rewardGoldPerTick: 1,
     experiencePerTick: 2,
     rarityWeights: { common: 75, uncommon: 22, rare: 3, epic: 0, legendary: 0 },
-    pool: ['slime', 'cavern_bat', 'goblin'],
+    pool: ['slime', 'cavern_bat', 'goblin', 'arcane_shroom', 'goblin_shaman'],
   },
   {
     id: 'dungeon_2',

@@ -54,7 +54,10 @@ export function processCombatTick(player: Player): TickResult {
   const mpBefore = player.mp;
   const mobBefore = player.currentMobHp ?? mob.maxHp;
 
-  const damageTaken = Math.max(1, mob.damage - (stats.physicalDefense ?? 0));
+  const damageTaken = Math.max(
+    1,
+    mob.damage - (mob.magicDamage ? (stats.magicalDefense ?? 0) : (stats.physicalDefense ?? 0)),
+  );
   player.hp = Math.max(0, player.hp - damageTaken);
 
   const regenHp = stats.regenHp ?? 0;

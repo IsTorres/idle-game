@@ -403,45 +403,6 @@ input:focus, select:focus {
   100% { transform: scale(0.1) translateY(-30px); opacity: 0; }
 }
 
-.float-events {
-  position: absolute;
-  right: 12px;
-  top: 40px;
-  bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 4px;
-  pointer-events: none;
-  z-index: 2;
-  max-width: 55%;
-}
-
-.float-event {
-  font-size: 0.7rem;
-  padding: 3px 8px;
-  background: rgba(0, 0, 0, 0.55);
-  border-radius: 4px;
-  border-left: 3px solid var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  animation: floatUp 3s ease-out forwards;
-}
-
-.float-event.ev-mobDamage { border-left-color: var(--hp-color); color: #ffa198; }
-.float-event.ev-loot { border-left-color: var(--gold); color: var(--gold); }
-.float-event.ev-mobKill { border-left-color: var(--success); color: var(--success); font-weight: 600; }
-.float-event.ev-exp { border-left-color: var(--exp-color); }
-.float-event.ev-regen { border-left-color: var(--success); color: var(--success); }
-
-@keyframes floatUp {
-  0% { opacity: 0; transform: translateY(8px); }
-  15% { opacity: 1; transform: translateY(0); }
-  75% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-28px); }
-}
-
 @media (max-width: 768px) {
   .grid-2, .grid-3, .grid-main {
     grid-template-columns: 1fr;

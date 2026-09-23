@@ -108,6 +108,7 @@ export interface Mob {
   maxHp: number;
   damage: number;
   defense: number;
+  magicDamage?: boolean;
   xpReward: number;
   goldReward: number;
   lootTable: LootTableEntry[];

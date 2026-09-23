@@ -16,6 +16,7 @@ function pct(value: number, max: number): number {
 export function DungeonView() {
   const player = useGameStore((s) => s.player);
   const combatLogs = useGameStore((s) => s.combatLogs);
+  const leaveDungeon = useGameStore((s) => s.leaveDungeon);
 
   if (!player || !player.currentDungeonId) return null;
   const dungeon = getDungeon(player.currentDungeonId);
@@ -23,7 +24,6 @@ export function DungeonView() {
   if (!dungeon || !mob) return null;
 
   const last = combatLogs[combatLogs.length - 1];
-  const recent = combatLogs.slice(-6);
   const mobHp = player.currentMobHp ?? mob.maxHp;
 
   return (
@@ -31,7 +31,9 @@ export function DungeonView() {
       <div className="scene-backdrop" />
       <div className="scene-hud">
         <span className="text-sm text-muted">{dungeon.name}</span>
-        <span className="text-xs text-muted">Andar {dungeon.level}</span>
+        <button onClick={leaveDungeon} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+          Sair da dungeon
+        </button>
       </div>
 
       <div className="scene-vs">
@@ -59,14 +61,6 @@ export function DungeonView() {
             <div className="bar-text" style={{ fontSize: '0.6rem' }}>{mobHp}/{mob.maxHp}</div>
           </div>
         </div>
-      </div>
-
-      <div className="float-events">
-        {recent.map((log, idx) => (
-          <div key={`${log.tick}-${idx}`} className={`float-event ev-${log.type}`}>
-            {log.message}
-          </div>
-        ))}
       </div>
     </div>
   );
