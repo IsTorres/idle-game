@@ -2,7 +2,9 @@ const API_BASE = '/api';
 
 export interface SaveData {
   hp: number;
+  maxHp: number;
   mp: number;
+  maxMp: number;
   gold: number;
   experience: number;
   title: string;

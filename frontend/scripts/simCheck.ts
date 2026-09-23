@@ -9,6 +9,7 @@ import { getItemDefinition } from '../src/game/items/itemDefinitions';
 import { addItem } from '../src/game/inventory/inventoryManager';
 import { getShopOfferings, buyItem } from '../src/game/economy/shop';
 import { useConsumable } from '../src/game/items/consumables';
+import { serializePlayer } from '../src/game/save/saveManager';
 
 function makePlayer(overrides: Partial<Player> = {}): Player {
   return {
@@ -173,17 +174,16 @@ function makePlayer(overrides: Partial<Player> = {}): Player {
   assert.ok(d1.pool.includes('goblin_shaman') && d1.pool.includes('arcane_shroom'), 'dungeon_1 must mix magic mobs');
   assert.equal(d1.pool.length, 5, 'dungeon_1 should have 5 distinct mobs');
 
-  const realStats = { magicalDefense: 12, physicalDefense: 18, physicalDamage: 50, regenHp: 2, regenMp: 1 };
-  const mage = makePlayer({
+  // high physicalDefense but low magicalDefense must NOT absorb a magic hit
+  const tank = makePlayer({
     currentDungeonId: 'dungeon_1',
-    baseStats: { maxHp: 1000, maxMp: 100, ...realStats },
+    baseStats: { maxHp: 1000, maxMp: 100, magicalDefense: 5, physicalDefense: 100, physicalDamage: 999, regenHp: 0, regenMp: 0 },
   });
-  mage.currentMobId = 'goblin_shaman';
-  mage.currentMobHp = shaman.maxHp;
-  const hpBefore = mage.hp;
-  processTick(mage);
-  assert.ok(mage.hp < hpBefore, 'magic mob must deal damage to mage');
-  assert.equal(hpBefore - mage.hp, Math.max(1, shaman.damage - 12) - 2, 'damage must use magicalDefense minus regen');
+  tank.currentMobId = 'goblin_shaman';
+  tank.currentMobHp = shaman.maxHp;
+  const hpBefore = tank.hp;
+  processTick(tank);
+  assert.equal(hpBefore - tank.hp, Math.max(1, shaman.damage - 5), 'magic hit must use magicalDefense only');
   console.log('OK: magic mobs hit magical defense');
 }
 
@@ -205,6 +205,16 @@ function makePlayer(overrides: Partial<Player> = {}): Player {
   assert.equal(player.hp, player.maxHp, 'hp must restore to max on level up');
   assert.equal(player.mp, player.maxMp, 'mp must restore to max on level up');
   console.log('OK: level up restores hp/mp');
+}
+
+{
+  // persistence: equipment-driven maxHp/maxMp must survive a save round-trip
+  const geared = makePlayer({ maxHp: 1543, maxMp: 287, hp: 999, mp: 1 });
+  const save = serializePlayer(geared);
+  assert.equal(save.maxHp, 1543, 'maxHp must be persisted');
+  assert.equal(save.maxMp, 287, 'maxMp must be persisted');
+  assert.equal(save.hp, 999, 'hp must be persisted');
+  console.log('OK: maxHp/maxMp persisted on save');
 }
 
 console.log('all sim checks passed');

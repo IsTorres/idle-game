@@ -4,7 +4,9 @@ import { apiClient, type SaveData } from '../../api/client';
 export function serializePlayer(player: Player): SaveData {
   return {
     hp: player.hp,
+    maxHp: player.maxHp,
     mp: player.mp,
+    maxMp: player.maxMp,
     gold: player.gold,
     experience: player.experience,
     title: player.title,

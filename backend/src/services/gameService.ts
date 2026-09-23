@@ -28,7 +28,9 @@ export const gameService = {
 
   async savePlayer(id: string, data: {
     hp: number;
+    maxHp: number;
     mp: number;
+    maxMp: number;
     gold: number;
     experience: number;
     title: string;
@@ -45,7 +47,9 @@ export const gameService = {
         where: { id },
         data: {
           hp: data.hp,
+          maxHp: data.maxHp,
           mp: data.mp,
+          maxMp: data.maxMp,
           gold: data.gold,
           experience: data.experience,
           title: data.title,
